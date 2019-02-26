@@ -26,11 +26,16 @@ public class ElevatorScene {
 									//if it suits you
 	ArrayList<Integer> exitedCount = null;
 	public static Semaphore exitedCountMutex;
+	
+	public static Semaphore sem; 
 
 	//Base function: definition must not change
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
 
+		sem = new Semaphore(0);
+		
+		sem.release();
 		/**
 		 * Important to add code here to make new
 		 * threads that run your elevator-runnables
@@ -74,6 +79,12 @@ public class ElevatorScene {
 		 * so that it can be reaped in the testSuite
 		 * (you don't have to join() yourself)
 		 */
+		
+		Person person = new Person(sourceFloor, destinationFloor);
+		Thread p_thread = new Thread(person);
+		
+		p_thread.start();
+		
 
 		//dumb code, replace it!
 		personCount.set(sourceFloor, personCount.get(sourceFloor) + 1);
