@@ -35,7 +35,15 @@ public class ElevatorScene {
 
 		sem = new Semaphore(0);
 		
-		sem.release();
+		new Thread(new Runnable() {
+			public void run() {
+				for(int i = 0; i < 20; i++) {
+					sem.release();
+				}	
+			}
+		}).start();
+		
+		//sem.release();
 		/**
 		 * Important to add code here to make new
 		 * threads that run your elevator-runnables
