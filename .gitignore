@@ -10,6 +10,14 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
+#Various other project related files
+*.gdl
+*.jar
+*.xml
+dist/*
+.DS_STORE
+.vscode/
+
 # Package Files #
 *.jar
 *.war
