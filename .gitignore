@@ -17,6 +17,9 @@
 dist/*
 .DS_STORE
 .vscode/
+.classpath
+.settings/*
+.project
 
 # Package Files #
 *.jar
