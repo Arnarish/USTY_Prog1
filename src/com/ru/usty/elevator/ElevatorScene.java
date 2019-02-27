@@ -30,9 +30,9 @@ public class ElevatorScene {
 	public static ArrayList<Semaphore> inElevatorMutex;
 	public static ArrayList<ArrayList<Semaphore>> exitFloors;
 	public static Semaphore personCMutex; 
-	public static Semaphore elevatorOpenMutex;
+	public static Semaphore elevatorOpenMutex; 
 	
-	public static Integer elevatorOpen;
+	public static Integer elevatorOpen; 
 	public static ArrayList<Integer> currFloor; //list of where all the elevators are located
 	public static ArrayList<Integer> peopleinElevator; //list of people in elevators
 	public ArrayList<Boolean> elevatorGoingUp; //is the elevator going up or down
@@ -69,7 +69,7 @@ public class ElevatorScene {
 
 		this.numberOfFloors = numberOfFloors;
 		this.numberOfElevators = numberOfElevators;
-		
+		//initialize all semaphores for a new run
 		personCMutex = new Semaphore(1);
 		elevatorOpenMutex = new Semaphore(1);
 		inElevatorMutex = new ArrayList<Semaphore>();
@@ -77,14 +77,14 @@ public class ElevatorScene {
 		goingUp = new ArrayList<Semaphore>();
 		exitedCountMutex = new ArrayList<Semaphore>();
 		exitFloors = new ArrayList<ArrayList<Semaphore>>();
-		
+		//initialize lists for a new run
 		personsUp = new ArrayList<Integer>();
 		personsDown = new ArrayList<Integer>();
 		personCount = new ArrayList<Integer>();
 		peopleinElevator = new ArrayList<Integer>();
 		elevatorGoingUp = new ArrayList<Boolean>();
 		currFloor = new ArrayList<Integer>();
-		
+		//below, we loop through the number of floors/elevators as appropriate and add each elevator/floor as relevant for a new run.
 		for(int i = 0; i < numberOfFloors; i++) {
 			this.personCount.add(0);
 			this.personsUp.add(0);
@@ -139,10 +139,13 @@ public class ElevatorScene {
 		p_thread.start();
 		
 		if(person.goingUp) {
+			ElevatorScene.eScene.incPeopleWaiting(sourceFloor, true);
+		}
+		else {
+			ElevatorScene.eScene.incPeopleWaiting(sourceFloor, false);
 		}
 		//dumb code, replace it!
-		personCount.set(sourceFloor, personCount.get(sourceFloor) + 1);
-		return null;  //this means that the testSuite will not wait for the threads to finish
+		return p_thread;  //this means that the testSuite will not wait for the threads to finish
 	}
 	
 	public void nextFloor(int elevator) {
