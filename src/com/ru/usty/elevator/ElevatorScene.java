@@ -25,9 +25,14 @@ public class ElevatorScene {
 	private int numberOfElevators;
 	
 	public static ArrayList<Semaphore> exitedCountMutex; //list in case of multiple elevators
-	public static Semaphore sem; 
+	public static ArrayList<Semaphore> goingUp;
+	public static ArrayList<Semaphore> goingDown;
+	public static ArrayList<Semaphore> inElevatorMutex;
+	public static ArrayList<ArrayList<Semaphore>> exitFloors;
+	public static Semaphore personCMutex; 
+	public static Semaphore elevatorOpenMutex;
 	
-	public static boolean elevatorOpen;
+	public static Integer elevatorOpen;
 	public static ArrayList<Integer> currFloor; //list of where all the elevators are located
 	public static ArrayList<Integer> peopleinElevator; //list of people in elevators
 	public ArrayList<Boolean> elevatorGoingUp; //is the elevator going up or down
@@ -46,9 +51,9 @@ public class ElevatorScene {
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
 
-		sem = new Semaphore(0);
+		//missing method to stop a run if there are threads running currently?
 		
-		new Thread(new Runnable() {
+		/*new Thread(new Runnable() { commented out by SDG, merge conflict
 			public void run() {
 				for(int i = 0; i < 20; i++) {
 					sem.release();
@@ -61,7 +66,8 @@ public class ElevatorScene {
 		//Elevator elevator = new Elevator(0, numberOfFloors, 0, null, sem);
 		
 		
-		//sem.release();
+		//sem.release();*/
+
 		/**
 		 * Important to add code here to make new
 		 * threads that run your elevator-runnables
@@ -72,17 +78,40 @@ public class ElevatorScene {
 		 * If you can, tell any currently running
 		 * elevator threads to stop
 		 */
+		
+		elevatorOpen = 0;
+		eScene = this;
 
 		this.numberOfFloors = numberOfFloors;
 		this.numberOfElevators = numberOfElevators;
 		
+		personCMutex = new Semaphore(1);
+		elevatorOpenMutex = new Semaphore(1);
+		inElevatorMutex = new ArrayList<Semaphore>();
+		goingDown = new ArrayList<Semaphore>();
+		goingUp = new ArrayList<Semaphore>();
+		exitedCountMutex = new ArrayList<Semaphore>();
+		exitFloors = new ArrayList<ArrayList<Semaphore>>();
+		
 		personsUp = new ArrayList<Integer>();
 		personsDown = new ArrayList<Integer>();
 		personCount = new ArrayList<Integer>();
+		peopleinElevator = new ArrayList<Integer>();
+		elevatorGoingUp = new ArrayList<Boolean>();
+		currFloor = new ArrayList<Integer>();
+		
 		for(int i = 0; i < numberOfFloors; i++) {
 			this.personCount.add(0);
 			this.personsUp.add(0);
 			this.personsDown.add(0);
+		}
+		
+		for(int i = 0; i < numberOfElevators; i++) {
+			exitFloors.add(new ArrayList<Semaphore>());
+			inElevatorMutex.add(new Semaphore(0));
+			for(int j=0; j < numberOfFloors; j++) {
+				exitFloors.get(i).add(new Semaphore(0));
+			}
 		}
 
 		if(exitedCount == null) {
@@ -96,9 +125,8 @@ public class ElevatorScene {
 		}
 		//initialize the elevators
 		for(int i = 0; i < numberOfElevators; i++) {
-			int startfloor = 0; // could be random if we want to initialize on a random floor
-			elevatorThread = new Thread(new Elevator(i, startfloor, numberOfFloors, ELEVATOR_MAX, getNumberOfPeopleInElevator(i), sem));
-			peopleinElevator.add(0); //nobody starts inside the elevator
+			int startfloor = 1; // could be random if we want to initialize on a random floor
+			elevatorThread = new Thread(new Elevator(i, startfloor, numberOfFloors, ELEVATOR_MAX, getNumberOfPeopleInElevator(i)));			peopleinElevator.add(0); //nobody starts inside the elevator
 			elevatorGoingUp.add(true); //we're starting on the ground floor, only way is up
 			currFloor.add(startfloor);
 			exitedCountMutex.add(new Semaphore(1));
@@ -124,29 +152,121 @@ public class ElevatorScene {
 		
 		p_thread.start();
 		
-
+		if(person.goingUp) {
+		}
 		//dumb code, replace it!
 		personCount.set(sourceFloor, personCount.get(sourceFloor) + 1);
 		return null;  //this means that the testSuite will not wait for the threads to finish
+	}
+	
+	public void nextFloor(int elevator) {
+		if (elevatorGoingUp.get(elevator) && getNumberOfPeopleInElevator(elevator) == 0) {
+			elevatorGoingUp.set(elevator, false);
+			for(int i=getCurrentFloorForElevator(elevator); i < getNumberOfFloors(); i++) {
+				if(isButtonPushedAtFloor(i)) {
+					elevatorGoingUp.set(elevator, true);
+				}
+			}
+		}
+		else if(!elevatorGoingUp.get(elevator) && getNumberOfPeopleInElevator(elevator) == 0) {
+			elevatorGoingUp.set(elevator, true);
+			for(int i = getCurrentFloorForElevator(elevator); i > 1; i--) {
+				if(isButtonPushedAtFloor(i)) {
+					elevatorGoingUp.set(elevator, false);
+				}
+			}
+		}
+		//make sure the elevator can't go out of bounds
+		if(ElevatorScene.currFloor.get(elevator) >= (this.numberOfFloors -1)) {
+			elevatorGoingUp.set(elevator, false);
+		}
+		else if(ElevatorScene.currFloor.get(elevator) < 1) {
+			elevatorGoingUp.set(elevator, true);
+		}
+		
+		if(elevatorGoingUp.get(elevator)) {
+			currFloor.set(elevator, (currFloor.get(elevator) +1));
+			if(ElevatorScene.currFloor.get(elevator) >= (this.numberOfFloors -1)) {
+				elevatorGoingUp.set(elevator, false);
+			}
+		}
+		else {
+			currFloor.set(elevator, (currFloor.get(elevator) -1));
+			if(ElevatorScene.currFloor.get(elevator) < 1) {
+				elevatorGoingUp.set(elevator, true);
+			}
+		}
+	}
+	
+	
+	public void incPeopleInElevator(int elevator) {
+		try {
+			personCMutex.acquire();
+			peopleinElevator.set(elevator, (getNumberOfPeopleInElevator(elevator) +1));
+			personCMutex.release();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+	
+	public void decPeopleInElevator(int elevator) {
+		try {
+			personCMutex.acquire();
+			peopleinElevator.set(elevator, (getNumberOfPeopleInElevator(elevator) -1));
+			personCMutex.release();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+	
+	public void incPeopleWaiting(int floor, boolean goingUp) {
+		try {
+			personCMutex.acquire();
+			personCount.set(floor, (personCount.get(floor)+1));
+			if(goingUp) {
+				personsUp.set(floor, (personsUp.get(floor)+1));
+			}
+			else {
+				personsDown.set(floor, (personsDown.get(floor)+1));
+			}
+			personCMutex.release();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+	
+	public void decPeopleWaiting(int floor, boolean goingUp) {
+		try {
+			personCMutex.acquire();
+			personCount.set(floor, (personCount.get(floor)-1));
+			if(goingUp) {
+				personsUp.set(floor, (personsUp.get(floor)-1));
+			}
+			else {
+				personsDown.set(floor, (personsDown.get(floor)-1));
+			}
+			personCMutex.release();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
 	}
 
 	//Base function: definition must not change, but add your code
 	public int getCurrentFloorForElevator(int elevator) {
 
 		//dumb code, replace it!
-		
-		return 1;
+		return currFloor.get(elevator);
 	}
 
 	//Base function: definition must not change, but add your code
 	public int getNumberOfPeopleInElevator(int elevator) {
 		
 		//dumb code, replace it!
-		switch(elevator) {
-		case 1: return 1;
-		case 2: return 4;
-		default: return 3;
-		}
+		return peopleinElevator.get(elevator);
 	}
 
 	//Base function: definition must not change, but add your code
