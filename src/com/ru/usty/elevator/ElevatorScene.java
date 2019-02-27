@@ -145,9 +145,43 @@ public class ElevatorScene {
 		return null;  //this means that the testSuite will not wait for the threads to finish
 	}
 	
-	//TODO traverse between floors function
 	public void nextFloor(int elevator) {
+		if (elevatorGoingUp.get(elevator) && getNumberOfPeopleInElevator(elevator) == 0) {
+			elevatorGoingUp.set(elevator, false);
+			for(int i=getCurrentFloorForElevator(elevator); i < getNumberOfFloors(); i++) {
+				if(isButtonPushedAtFloor(i)) {
+					elevatorGoingUp.set(elevator, true);
+				}
+			}
+		}
+		else if(!elevatorGoingUp.get(elevator) && getNumberOfPeopleInElevator(elevator) == 0) {
+			elevatorGoingUp.set(elevator, true);
+			for(int i = getCurrentFloorForElevator(elevator); i > 1; i--) {
+				if(isButtonPushedAtFloor(i)) {
+					elevatorGoingUp.set(elevator, false);
+				}
+			}
+		}
+		//make sure the elevator can't go out of bounds
+		if(ElevatorScene.currFloor.get(elevator) >= (this.numberOfFloors -1)) {
+			elevatorGoingUp.set(elevator, false);
+		}
+		else if(ElevatorScene.currFloor.get(elevator) < 1) {
+			elevatorGoingUp.set(elevator, true);
+		}
 		
+		if(elevatorGoingUp.get(elevator)) {
+			currFloor.set(elevator, (currFloor.get(elevator) +1));
+			if(ElevatorScene.currFloor.get(elevator) >= (this.numberOfFloors -1)) {
+				elevatorGoingUp.set(elevator, false);
+			}
+		}
+		else {
+			currFloor.set(elevator, (currFloor.get(elevator) -1));
+			if(ElevatorScene.currFloor.get(elevator) < 1) {
+				elevatorGoingUp.set(elevator, true);
+			}
+		}
 	}
 	
 	
