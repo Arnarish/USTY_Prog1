@@ -16,20 +16,31 @@ public class ElevatorScene {
 	//TO SPEED THINGS UP WHEN TESTING,
 	//feel free to change this.  It will be changed during grading
 	public static final int VISUALIZATION_WAIT_TIME = 500;  //milliseconds
-
+	public static final int ELEVATOR_MAX = 6; //maximum allowed passengers in the elevator
+	public static final int ELEVATOR_MAX_TOPBOT = 4; //to prevent starving in middle floors, don't allow filling the elevator at min/max floors
+	
+	public static ElevatorScene eScene; //allows the threads to communicate and modify required parameters
+	
 	private int numberOfFloors;
 	private int numberOfElevators;
+	
+	public static ArrayList<Semaphore> exitedCountMutex; //list in case of multiple elevators
+	public static Semaphore sem; 
+	
+	public static boolean elevatorOpen;
+	public static ArrayList<Integer> currFloor; //list of where all the elevators are located
+	public static ArrayList<Integer> peopleinElevator; //list of people in elevators
+	public ArrayList<Boolean> elevatorGoingUp; //is the elevator going up or down
 
 	ArrayList<Integer> personCount; //use if you want but
 									//throw away and
 									//implement differently
 									//if it suits you
 	ArrayList<Integer> exitedCount = null;
-	public static Semaphore exitedCountMutex;
+	ArrayList<Integer> personsUp; //people going up
+	ArrayList<Integer> personsDown; //people going down
 	
-	public static Semaphore sem; 
-	
-	//public static Elevator elevator = new Elevator(0, numberOfFloors, 0, null);
+	private Thread elevatorThread = null;
 
 	//Base function: definition must not change
 	//Necessary to add your code in this one
@@ -46,7 +57,8 @@ public class ElevatorScene {
 			}
 		}).start();
 		
-		Elevator elevator = new Elevator(0, 0, numberOfFloors, 0, null, sem);
+		//Elevator elevator = new Elevator(0, 0, numberOfFloors, 0, null, sem);
+		//Elevator elevator = new Elevator(0, numberOfFloors, 0, null, sem);
 		
 		
 		//sem.release();
@@ -63,10 +75,14 @@ public class ElevatorScene {
 
 		this.numberOfFloors = numberOfFloors;
 		this.numberOfElevators = numberOfElevators;
-
+		
+		personsUp = new ArrayList<Integer>();
+		personsDown = new ArrayList<Integer>();
 		personCount = new ArrayList<Integer>();
 		for(int i = 0; i < numberOfFloors; i++) {
 			this.personCount.add(0);
+			this.personsUp.add(0);
+			this.personsDown.add(0);
 		}
 
 		if(exitedCount == null) {
@@ -78,7 +94,16 @@ public class ElevatorScene {
 		for(int i = 0; i < getNumberOfFloors(); i++) {
 			this.exitedCount.add(0);
 		}
-		exitedCountMutex = new Semaphore(1);
+		//initialize the elevators
+		for(int i = 0; i < numberOfElevators; i++) {
+			int startfloor = 0; // could be random if we want to initialize on a random floor
+			elevatorThread = new Thread(new Elevator(i, startfloor, numberOfFloors, ELEVATOR_MAX, getNumberOfPeopleInElevator(i), sem));
+			peopleinElevator.add(0); //nobody starts inside the elevator
+			elevatorGoingUp.add(true); //we're starting on the ground floor, only way is up
+			currFloor.add(startfloor);
+			exitedCountMutex.add(new Semaphore(1));
+			elevatorThread.start();
+		}
 	}
 
 	//Base function: definition must not change
@@ -168,12 +193,12 @@ public class ElevatorScene {
 	//let the system know that they have exited.
 	//Person calls it after being let off elevator
 	//but before it finishes its run.
-	public void personExitsAtFloor(int floor) {
+	public void personExitsAtFloor(int floor, int elevator) {
 		try {
 			
-			exitedCountMutex.acquire();
+			exitedCountMutex.get(elevator).acquire();
 			exitedCount.set(floor, (exitedCount.get(floor) + 1));
-			exitedCountMutex.release();
+			exitedCountMutex.get(elevator).release();
 
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
