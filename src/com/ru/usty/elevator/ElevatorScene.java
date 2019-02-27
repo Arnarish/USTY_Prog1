@@ -46,7 +46,7 @@ public class ElevatorScene {
 			}
 		}).start();
 		
-		Elevator elevator = new Elevator(0, numberOfFloors, 0, null, sem);
+		Elevator elevator = new Elevator(0, 0, numberOfFloors, 0, null, sem);
 		
 		
 		//sem.release();
@@ -109,6 +109,7 @@ public class ElevatorScene {
 	public int getCurrentFloorForElevator(int elevator) {
 
 		//dumb code, replace it!
+		
 		return 1;
 	}
 
