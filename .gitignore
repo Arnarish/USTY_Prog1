@@ -20,6 +20,9 @@ dist/*
 .classpath
 .settings/*
 .project
+.recommenders/*
+bin/*
+
 
 # Package Files #
 *.jar
