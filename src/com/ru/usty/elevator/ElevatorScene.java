@@ -28,6 +28,8 @@ public class ElevatorScene {
 	public static Semaphore exitedCountMutex;
 	
 	public static Semaphore sem; 
+	
+	//public static Elevator elevator = new Elevator(0, numberOfFloors, 0, null);
 
 	//Base function: definition must not change
 	//Necessary to add your code in this one
@@ -39,9 +41,13 @@ public class ElevatorScene {
 			public void run() {
 				for(int i = 0; i < 20; i++) {
 					sem.release();
+					System.out.println("Permits " + sem.availablePermits());
 				}	
 			}
 		}).start();
+		
+		Elevator elevator = new Elevator(0, numberOfFloors, 0, null, sem);
+		
 		
 		//sem.release();
 		/**
