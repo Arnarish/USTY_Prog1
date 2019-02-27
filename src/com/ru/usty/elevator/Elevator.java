@@ -1,6 +1,6 @@
 package com.ru.usty.elevator;
 
-
+import sun.font.TrueTypeFont;
 
 public class Elevator implements Runnable{
 	int elevatorID, currFloor, maxFloor, capacity, passangers;
@@ -19,6 +19,8 @@ public class Elevator implements Runnable{
 	
 	
 	public void run() {
-		System.out.println("Elevator running");
+		while(true) {
+			
+		}
 	}
 }

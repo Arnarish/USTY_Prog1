@@ -18,32 +18,27 @@ public class Person implements Runnable{
 	
 	public void run() {
 		try {
-			//TODO
-			//if person is going up, aquire goingUp semaphore on source floor
-			//else aquire goingDown semaphorer on soure floor
-			
-			//decrement the number of people waiting at source floor
-			//increment the passenger count of the elevator
-			
-			//waiting in elevator mutex?
+			//person going up or down?
 			if (goingUp) {
 				ElevatorScene.goingUp.get(source).acquire();
 			}
 			else {
 				ElevatorScene.goingDown.get(source).acquire();
 			}
+			//in case of multiple elevator options, keep track of what elevator this person is in
 			this.elevator = ElevatorScene.elevatorOpen;
-			
-			
+			//person is in the elevator, remove from waiting and put in elevator
 			ElevatorScene.eScene.decPeopleWaiting(source, goingUp);
 			ElevatorScene.eScene.incPeopleInElevator(elevator);
-			
-			
+			//use mutex to lock person in elevator, elevator releases person once it is on the correct floor
+			ElevatorScene.inElevatorMutex.get(elevator).acquire();
+			ElevatorScene.exitFloors.get(elevator).get(dest).acquire();
 			
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		//person exits the elevator
 		ElevatorScene.eScene.personExitsAtFloor(dest, elevator);
 		ElevatorScene.eScene.decPeopleInElevator(elevator);
 	}
