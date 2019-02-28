@@ -34,7 +34,7 @@ public class ElevatorScene {
 	
 	public static Integer elevatorOpen; 
 	public static ArrayList<Integer> currFloor; //list of where all the elevators are located
-	public static ArrayList<Integer> peopleinElevator; //list of people in elevators
+	public static ArrayList<Integer> peopleInElevator; //list of people in elevators
 	public ArrayList<Boolean> elevatorGoingUp; //is the elevator going up or down
 
 	ArrayList<Integer> personCount; //use if you want but
@@ -96,7 +96,7 @@ public class ElevatorScene {
 		personsUp = new ArrayList<Integer>();
 		personsDown = new ArrayList<Integer>();
 		personCount = new ArrayList<Integer>();
-		peopleinElevator = new ArrayList<Integer>();
+		peopleInElevator = new ArrayList<Integer>();
 		elevatorGoingUp = new ArrayList<Boolean>();
 		currFloor = new ArrayList<Integer>();
 		//below, we loop through the number of floors/elevators as appropriate and add each elevator/floor as relevant for a new run.
@@ -126,7 +126,8 @@ public class ElevatorScene {
 		//initialize the elevators
 		for(int i = 0; i < numberOfElevators; i++) {
 			int startfloor = 1; // could be random if we want to initialize on a random floor
-			elevatorThread = new Thread(new Elevator(i, startfloor, numberOfFloors, ELEVATOR_MAX, getNumberOfPeopleInElevator(i)));			peopleinElevator.add(0); //nobody starts inside the elevator
+			peopleInElevator.add(0);
+			elevatorThread = new Thread(new Elevator(i, startfloor, ELEVATOR_MAX, peopleInElevator.get(i))); //nobody starts inside the elevator
 			elevatorGoingUp.add(true); //we're starting on the ground floor, only way is up
 			currFloor.add(startfloor);
 			exitedCountMutex.add(new Semaphore(1));
@@ -205,7 +206,7 @@ public class ElevatorScene {
 	public void incPeopleInElevator(int elevator) {
 		try {
 			personCMutex.acquire();
-			peopleinElevator.set(elevator, (getNumberOfPeopleInElevator(elevator) +1));
+			peopleInElevator.set(elevator, (getNumberOfPeopleInElevator(elevator) +1));
 			personCMutex.release();
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -269,7 +270,7 @@ public class ElevatorScene {
 	public int getNumberOfPeopleInElevator(int elevator) {
 		
 		//dumb code, replace it!
-		return peopleinElevator.get(elevator);
+		return peopleInElevator.get(elevator);
 	}
 
 	//Base function: definition must not change, but add your code
