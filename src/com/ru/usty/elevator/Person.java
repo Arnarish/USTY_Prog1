@@ -27,7 +27,7 @@ public class Person implements Runnable{
 			}
 			//in case of multiple elevator options, keep track of what elevator this person is in
 			this.elevator = ElevatorScene.elevatorOpen;
-			System.out.println("Person: Entering elevator: " + elevator + " on floor " + ElevatorScene.eScene.getCurrentFloorForElevator(elevator));
+			//System.out.println("Person: Entering elevator: " + elevator + " on floor " + ElevatorScene.eScene.getCurrentFloorForElevator(elevator) + ". Destination floor: " + dest);
 			//person is in the elevator, remove from waiting and put in elevator
 			ElevatorScene.eScene.decPeopleWaiting(source, goingUp);
 			ElevatorScene.eScene.incPeopleInElevator(elevator);
@@ -40,7 +40,7 @@ public class Person implements Runnable{
 			e.printStackTrace();
 		}
 		//person exits the elevator
-		System.out.println("Person: Exiting at floor: " + dest);
+		//System.out.println("Person: Exiting at floor: " + dest);
 		ElevatorScene.eScene.personExitsAtFloor(dest, elevator);
 		ElevatorScene.eScene.decPeopleInElevator(elevator);
 	}

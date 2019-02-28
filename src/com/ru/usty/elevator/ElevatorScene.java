@@ -127,7 +127,7 @@ public class ElevatorScene {
 		}
 		//initialize the elevators
 		for(int i = 0; i < numberOfElevators; i++) {
-			int startfloor = 1; // could be random if we want to initialize on a random floor
+			int startfloor = 0; // could be random if we want to initialize on a random floor
 			peopleInElevator.add(0);
 			elevatorThread = new Thread(new Elevator(i, startfloor, ELEVATOR_MAX, peopleInElevator.get(i))); //nobody starts inside the elevator
 			elevatorGoingUp.add(true); //we're starting on the ground floor, only way is up
@@ -167,17 +167,21 @@ public class ElevatorScene {
 	
 	public void nextFloor(int elevator) {
 		if (elevatorGoingUp.get(elevator) && getNumberOfPeopleInElevator(elevator) == 0) {
-			elevatorGoingUp.set(elevator, false);
+			//elevatorGoingUp.set(elevator, false);
+			System.out.println("I'm empty and going up, turning down.");
 			for(int i=getCurrentFloorForElevator(elevator); i < getNumberOfFloors(); i++) {
 				if(isButtonPushedAtFloor(i)) {
+					System.out.println("I'm empty and going up, someone is above me. Going up.");
 					elevatorGoingUp.set(elevator, true);
 				}
 			}
 		}
 		else if(!elevatorGoingUp.get(elevator) && getNumberOfPeopleInElevator(elevator) == 0) {
-			elevatorGoingUp.set(elevator, true);
-			for(int i = getCurrentFloorForElevator(elevator); i > 1; i--) {
+			//elevatorGoingUp.set(elevator, true);
+			System.out.println("I'm empty and going down, turning it UP.");
+			for(int i = getCurrentFloorForElevator(elevator); i > 0; i--) {
 				if(isButtonPushedAtFloor(i)) {
+					System.out.println("I'm empty and going down, someone is below me. Going down.");
 					elevatorGoingUp.set(elevator, false);
 				}
 			}
