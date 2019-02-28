@@ -110,7 +110,7 @@ public class ElevatorScene {
 		}
 		//initialize the elevators
 		for(int i = 0; i < numberOfElevators; i++) {
-			int startfloor = 1; // could be random if we want to initialize on a random floor
+			int startfloor = 0; // could be random if we want to initialize on a random floor
 			elevatorThread = new Thread(new Elevator(startfloor, numberOfFloors, ELEVATOR_MAX));
 			peopleinElevator.add(0); //nobody starts inside the elevator
 			elevatorGoingUp.add(true); //we're starting on the ground floor, only way is up
