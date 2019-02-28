@@ -30,7 +30,7 @@ public class ElevatorScene {
 	public static ArrayList<Semaphore> inElevatorMutex;
 	public static ArrayList<ArrayList<Semaphore>> exitFloors;
 	public static Semaphore personCMutex; 
-	public static Semaphore elevatorOpenMutex; 
+	public static Semaphore elevatorOpenMutex; //no more than one elevator open at once
 	
 	public static Integer elevatorOpen; 
 	public static ArrayList<Integer> currFloor; //list of where all the elevators are located
@@ -122,6 +122,8 @@ public class ElevatorScene {
 		}
 		for(int i = 0; i < getNumberOfFloors(); i++) {
 			this.exitedCount.add(0);
+			goingUp.add(new Semaphore(0));
+			goingDown.add(new Semaphore(0));
 		}
 		//initialize the elevators
 		for(int i = 0; i < numberOfElevators; i++) {
@@ -217,7 +219,7 @@ public class ElevatorScene {
 	public void decPeopleInElevator(int elevator) {
 		try {
 			personCMutex.acquire();
-			peopleinElevator.set(elevator, (getNumberOfPeopleInElevator(elevator) -1));
+			peopleInElevator.set(elevator, (getNumberOfPeopleInElevator(elevator) -1));
 			personCMutex.release();
 		} catch (Exception e) {
 			// TODO: handle exception
