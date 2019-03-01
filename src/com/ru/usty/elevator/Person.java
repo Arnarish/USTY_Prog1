@@ -8,7 +8,7 @@ public class Person implements Runnable{
 		this.source = source;
 		this.dest = dest; 
 		//boolean to track if person is going up or down with the elevator
-		if(dest > source) {
+		if(dest >= source) {
 			this.goingUp = true;
 		}
 		else {
@@ -40,7 +40,7 @@ public class Person implements Runnable{
 			e.printStackTrace();
 		}
 		//person exits the elevator
-		//System.out.println("Person: Exiting at floor: " + dest + " Elevator is at: " + ElevatorScene.eScene.getCurrentFloorForElevator(elevator));
+		//System.out.println("Person: Exiting at floor: " + dest);
 		ElevatorScene.eScene.personExitsAtFloor(dest, elevator);
 		ElevatorScene.eScene.decPeopleInElevator(elevator);
 	}
