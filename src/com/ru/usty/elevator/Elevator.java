@@ -26,7 +26,7 @@ public class Elevator implements Runnable{
 				ElevatorScene.elevatorOpen = elevatorID;
 				//System.out.println("Elevator " + elevatorID + " Opening door at floor " + ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID));
 				//release semaphores so passengers can exit the elevator
-				ElevatorScene.inElevatorMutex.get(elevatorID).release();
+				ElevatorScene.inElevatorMutex.get(elevatorID).release(ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID));
 				//gives other threads time to work
 				Thread.sleep(500);
 				//block so people can't exit the elevator if current floor is not the destination
@@ -37,12 +37,13 @@ public class Elevator implements Runnable{
 				ElevatorScene.exitFloors.get(elevatorID).get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).tryAcquire(ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID));
 
 				this.passangers = ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID);
+				System.out.println(this.passangers);
 				if((capacity - passangers) > 0) {
 					if(ElevatorScene.eScene.elevatorGoingUp.get(elevatorID)) {
 						//only people in wait going up
 						int peopleWaiting = ElevatorScene.eScene.getNumberOfPeopleWaitingAtFloor(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID));
 						if(peopleWaiting + passangers > capacity) {
-							ElevatorScene.goingUp.get(elevatorID).release(capacity-passangers);
+							ElevatorScene.goingUp.get(elevatorID).release(capacity - passangers);
 						}
 						else {
 							ElevatorScene.goingUp.get(elevatorID).release(peopleWaiting);

@@ -40,7 +40,7 @@ public class Person implements Runnable{
 			e.printStackTrace();
 		}
 		//person exits the elevator
-		//System.out.println("Person: Exiting at floor: " + dest);
+		//System.out.println("Person: Exiting at floor: " + dest + " Elevator is at: " + ElevatorScene.eScene.getCurrentFloorForElevator(elevator));
 		ElevatorScene.eScene.personExitsAtFloor(dest, elevator);
 		ElevatorScene.eScene.decPeopleInElevator(elevator);
 	}
