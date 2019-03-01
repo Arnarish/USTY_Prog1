@@ -167,7 +167,6 @@ public class ElevatorScene {
 	
 	public void nextFloor(int elevator) {
 		if (elevatorGoingUp.get(elevator) && getNumberOfPeopleInElevator(elevator) == 0) {
-			//elevatorGoingUp.set(elevator, false);
 			for(int i=getCurrentFloorForElevator(elevator); i >= 0; i--) {
 				if(isButtonPushedAtFloor(i)) {
 					elevatorGoingUp.set(elevator, false);
@@ -175,12 +174,13 @@ public class ElevatorScene {
 			}		
 		}
 		else if(!elevatorGoingUp.get(elevator) && getNumberOfPeopleInElevator(elevator) == 0) {
-			for(int i=getCurrentFloorForElevator(elevator); i < getNumberOfFloors(); i++) {
+			for(int i=getNumberOfFloors(); i < getCurrentFloorForElevator(elevator); i--) {
 				if(isButtonPushedAtFloor(i)) {
 					elevatorGoingUp.set(elevator, true);
 				}
 			}
 		}
+		
 		//make sure the elevator can't go out of bounds
 		if(ElevatorScene.currFloor.get(elevator) >= (this.numberOfFloors -1)) {
 			elevatorGoingUp.set(elevator, false);
@@ -188,7 +188,9 @@ public class ElevatorScene {
 		else if(ElevatorScene.currFloor.get(elevator) < 1) {
 			elevatorGoingUp.set(elevator, true);
 		}
-		
+	}
+	
+	public void floorTransition(int elevator) {
 		if(elevatorGoingUp.get(elevator)) {
 			currFloor.set(elevator, (currFloor.get(elevator) +1));
 			if(ElevatorScene.currFloor.get(elevator) >= (this.numberOfFloors -1)) {
