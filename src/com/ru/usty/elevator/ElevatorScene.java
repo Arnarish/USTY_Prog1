@@ -30,9 +30,9 @@ public class ElevatorScene {
 	public static ArrayList<Semaphore> inElevatorMutex;
 	public static ArrayList<ArrayList<Semaphore>> exitFloors;
 	public static Semaphore personCMutex; 
-	public static Semaphore elevatorOpenMutex; //no more than one elevator open at once
+	public static ArrayList<Semaphore> elevatorOpenMutex; //no more than one elevator open at once
 	
-	public static Integer elevatorOpen; 
+	public static ArrayList<Integer> elevatorOpen; 
 	public static ArrayList<Integer> currFloor; //list of where all the elevators are located
 	public static ArrayList<Integer> peopleInElevator; //list of people in elevators
 	public ArrayList<Boolean> elevatorGoingUp; //is the elevator going up or down
@@ -63,20 +63,20 @@ public class ElevatorScene {
 		 * elevator threads to stop
 		 */
 		
-		elevatorOpen = null;
 		eScene = this;
 
 		this.numberOfFloors = numberOfFloors;
 		this.numberOfElevators = numberOfElevators;
 		//initialize all semaphores for a new run
 		personCMutex = new Semaphore(1);
-		elevatorOpenMutex = new Semaphore(1);
+		elevatorOpenMutex = new ArrayList<Semaphore>();
 		inElevatorMutex = new ArrayList<Semaphore>();
 		goingDown = new ArrayList<Semaphore>();
 		goingUp = new ArrayList<Semaphore>();
 		exitedCountMutex = new ArrayList<Semaphore>();
 		exitFloors = new ArrayList<ArrayList<Semaphore>>();
 		//initialize lists for a new run
+		elevatorOpen = new ArrayList<Integer>();
 		personsUp = new ArrayList<Integer>();
 		personsDown = new ArrayList<Integer>();
 		personCount = new ArrayList<Integer>();
@@ -88,6 +88,7 @@ public class ElevatorScene {
 			this.personCount.add(0);
 			this.personsUp.add(0);
 			this.personsDown.add(0);
+			this.elevatorOpen.add(null);
 		}
 		
 		for(int i = 0; i < numberOfElevators; i++) {
@@ -105,6 +106,7 @@ public class ElevatorScene {
 			exitedCount.clear();
 		}
 		for(int i = 0; i < getNumberOfFloors(); i++) {
+			elevatorOpenMutex.add(new Semaphore(1));
 			this.exitedCount.add(0);
 			goingUp.add(new Semaphore(0));
 			goingDown.add(new Semaphore(0));
@@ -149,9 +151,18 @@ public class ElevatorScene {
 		return p_thread;  //this means that the testSuite will not wait for the threads to finish
 	}
 	
+	//Avoid starvation for floors between top and bottom
+	public boolean checkMiddle() {
+		for(int i = 1; i < numberOfFloors-1; i++) {
+			if(isButtonPushedAtFloor(i)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public void nextFloor(int elevator) {
 		if (elevatorGoingUp.get(elevator) && getNumberOfPeopleInElevator(elevator) == 0) {
-			//elevatorGoingUp.set(elevator, false);
 			for(int i=getCurrentFloorForElevator(elevator); i >= 0; i--) {
 				if(isButtonPushedAtFloor(i)) {
 					elevatorGoingUp.set(elevator, false);
@@ -159,12 +170,13 @@ public class ElevatorScene {
 			}		
 		}
 		else if(!elevatorGoingUp.get(elevator) && getNumberOfPeopleInElevator(elevator) == 0) {
-			for(int i=getCurrentFloorForElevator(elevator); i < getNumberOfFloors(); i++) {
+			for(int i=getNumberOfFloors(); i < getCurrentFloorForElevator(elevator); i--) {
 				if(isButtonPushedAtFloor(i)) {
 					elevatorGoingUp.set(elevator, true);
 				}
 			}
 		}
+		
 		//make sure the elevator can't go out of bounds
 		if(ElevatorScene.currFloor.get(elevator) >= (this.numberOfFloors -1)) {
 			elevatorGoingUp.set(elevator, false);
@@ -172,7 +184,9 @@ public class ElevatorScene {
 		else if(ElevatorScene.currFloor.get(elevator) < 1) {
 			elevatorGoingUp.set(elevator, true);
 		}
-		
+	}
+	
+	public void floorTransition(int elevator) {
 		if(elevatorGoingUp.get(elevator)) {
 			currFloor.set(elevator, (currFloor.get(elevator) +1));
 			if(ElevatorScene.currFloor.get(elevator) >= (this.numberOfFloors -1)) {
