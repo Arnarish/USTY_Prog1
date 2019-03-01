@@ -12,7 +12,6 @@ public class Elevator implements Runnable{
 		this.passangers = passangersTotal;
 	}
 	
-	
 	public void run() {
 		while(true) {
 			try{
@@ -21,21 +20,25 @@ public class Elevator implements Runnable{
 					return;
 				}
 				//first open the doors, not allowing other elevators to open.
-				ElevatorScene.elevatorOpenMutex.acquire();
-				ElevatorScene.elevatorOpen = elevatorID;
+				ElevatorScene.elevatorOpenMutex.get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).acquire();
+				ElevatorScene.elevatorOpen.set(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID), elevatorID);
 				//update whether the elevator is going up or down
 				if(ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID) >= 0) {
 					releasePassengers();
+					Thread.sleep(100);
 					loadPassengers();
+					Thread.sleep(100);
 					releasePassengers();
 				}
 				else {
 					loadPassengers();
+					Thread.sleep(100);
 					releasePassengers();
 				}
 			
 				// close the door, and move on to the next floor
-				ElevatorScene.elevatorOpenMutex.release();
+				ElevatorScene.elevatorOpenMutex.get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).release();
+				Thread.sleep(500);
 				ElevatorScene.eScene.nextFloor(elevatorID);
 				ElevatorScene.eScene.floorTransition(elevatorID);
 				
@@ -49,6 +52,12 @@ public class Elevator implements Runnable{
 	private void loadPassengers() {
 		try {
 			this.passangers = ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID);
+			if(ElevatorScene.eScene.checkMiddle() && (ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID) == 0 || ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID) == ElevatorScene.eScene.getNumberOfFloors()-1)) {
+				this.capacity = ElevatorScene.ELEVATOR_MAX_TOPBOT;
+			}
+			else {
+				this.capacity = ElevatorScene.ELEVATOR_MAX;
+			}
 				int peopleWaiting = ElevatorScene.eScene.getNumberOfPeopleWaitingAtFloor(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID));
 				if(ElevatorScene.eScene.elevatorGoingUp.get(elevatorID)) {
 					//only people in wait going up

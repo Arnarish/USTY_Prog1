@@ -17,7 +17,7 @@ public class ElevatorScene {
 	//feel free to change this.  It will be changed during grading
 	public static final int VISUALIZATION_WAIT_TIME = 400;  //milliseconds
 	public static final int ELEVATOR_MAX = 6; //maximum allowed passengers in the elevator
-	public static final int ELEVATOR_MAX_TOPBOT = 4; //to prevent starving in middle floors, don't allow filling the elevator at min/max floors
+	public static final int ELEVATOR_MAX_TOPBOT = 3; //to prevent starving in middle floors, don't allow filling the elevator at min/max floors
 	
 	public static ElevatorScene eScene; //allows the threads to communicate and modify required parameters
 	
@@ -32,9 +32,9 @@ public class ElevatorScene {
 	public static ArrayList<Semaphore> inElevatorMutex;
 	public static ArrayList<ArrayList<Semaphore>> exitFloors;
 	public static Semaphore personCMutex; 
-	public static Semaphore elevatorOpenMutex; //no more than one elevator open at once
+	public static ArrayList<Semaphore> elevatorOpenMutex; //no more than one elevator open at once per floor
 	
-	public static Integer elevatorOpen; 
+	public static ArrayList<Integer> elevatorOpen; //what elevator is open at each floor?
 	public static ArrayList<Integer> currFloor; //list of where all the elevators are located
 	public static ArrayList<Integer> peopleInElevator; //list of people in elevators
 	public ArrayList<Boolean> elevatorGoingUp; //is the elevator going up or down
@@ -53,7 +53,7 @@ public class ElevatorScene {
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
 
-		//missing method to stop a run if there are threads running currently?
+		//stop any elevator threads running
 		stoprun = true;
 		if(elevatorThread != null) {
 			try {
@@ -64,42 +64,37 @@ public class ElevatorScene {
 				e.printStackTrace();
 			}
 		}
-		/**
-		 * Important to add code here to make new
-		 * threads that run your elevator-runnables
-		 * 
-		 * Also add any other code that initializes
-		 * your system for a new run
-		 * 
-		 * If you can, tell any currently running
-		 * elevator threads to stop
-		 */
-		stoprun = false;
-		elevatorOpen = null;
+		
+		stoprun = false; //must be set to false again before starting elevators
 		eScene = this;
 
 		this.numberOfFloors = numberOfFloors;
 		this.numberOfElevators = numberOfElevators;
+		
 		//initialize all semaphores for a new run
 		personCMutex = new Semaphore(1);
-		elevatorOpenMutex = new Semaphore(1);
+		elevatorOpenMutex = new ArrayList<Semaphore>();
 		inElevatorMutex = new ArrayList<Semaphore>();
 		goingDown = new ArrayList<Semaphore>();
 		goingUp = new ArrayList<Semaphore>();
 		exitedCountMutex = new ArrayList<Semaphore>();
 		exitFloors = new ArrayList<ArrayList<Semaphore>>();
+		
 		//initialize lists for a new run
+		elevatorOpen = new ArrayList<Integer>();
 		personsUp = new ArrayList<Integer>();
 		personsDown = new ArrayList<Integer>();
 		personCount = new ArrayList<Integer>();
 		peopleInElevator = new ArrayList<Integer>();
 		elevatorGoingUp = new ArrayList<Boolean>();
 		currFloor = new ArrayList<Integer>();
+		
 		//below, we loop through the number of floors/elevators as appropriate and add each elevator/floor as relevant for a new run.
 		for(int i = 0; i < numberOfFloors; i++) {
 			this.personCount.add(0);
 			this.personsUp.add(0);
 			this.personsDown.add(0);
+			elevatorOpen.add(null);
 		}
 		
 		for(int i = 0; i < numberOfElevators; i++) {
@@ -117,6 +112,7 @@ public class ElevatorScene {
 			exitedCount.clear();
 		}
 		for(int i = 0; i < getNumberOfFloors(); i++) {
+			elevatorOpenMutex.add(new Semaphore(1));
 			this.exitedCount.add(0);
 			goingUp.add(new Semaphore(0));
 			goingDown.add(new Semaphore(0));
@@ -159,6 +155,17 @@ public class ElevatorScene {
 		}
 		//dumb code, replace it!
 		return p_thread;  //this means that the testSuite will not wait for the threads to finish
+	}
+	
+	//Avoid starvation for floors between top and bottom
+	public boolean checkMiddle() {
+		//if any floor between top and bottom has any individual waiting, return true
+		for(int i = 1; i < numberOfFloors-1; i++) {
+			if(isButtonPushedAtFloor(i)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public void nextFloor(int elevator) {

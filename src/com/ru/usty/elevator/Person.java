@@ -26,7 +26,7 @@ public class Person implements Runnable{
 				ElevatorScene.goingDown.get(source).acquire();
 			}
 			//in case of multiple elevator options, keep track of what elevator this person is in
-			this.elevator = ElevatorScene.elevatorOpen;
+			this.elevator = ElevatorScene.elevatorOpen.get(source);
 			//System.out.println("Person: Entering elevator: " + elevator + " on floor " + ElevatorScene.eScene.getCurrentFloorForElevator(elevator) + ". Destination floor: " + dest);
 			//person is in the elevator, remove from waiting and put in elevator
 			ElevatorScene.eScene.decPeopleWaiting(source, goingUp);
