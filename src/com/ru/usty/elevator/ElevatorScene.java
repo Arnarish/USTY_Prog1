@@ -51,22 +51,6 @@ public class ElevatorScene {
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
 
-		//missing method to stop a run if there are threads running currently?
-		
-		/*new Thread(new Runnable() { commented out by SDG, merge conflict
-			public void run() {
-				for(int i = 0; i < 20; i++) {
-					sem.release();
-					System.out.println("Permits " + sem.availablePermits());
-				}	
-			}
-		}).start();
-		
-		//Elevator elevator = new Elevator(0, 0, numberOfFloors, 0, null, sem);
-		//Elevator elevator = new Elevator(0, numberOfFloors, 0, null, sem);
-		
-		
-		//sem.release();*/
 
 		/**
 		 * Important to add code here to make new
