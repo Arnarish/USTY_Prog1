@@ -15,7 +15,7 @@ public class ElevatorScene {
 
 	//TO SPEED THINGS UP WHEN TESTING,
 	//feel free to change this.  It will be changed during grading
-	public static final int VISUALIZATION_WAIT_TIME = 500;  //milliseconds
+	public static final int VISUALIZATION_WAIT_TIME = 400;  //milliseconds
 	public static final int ELEVATOR_MAX = 6; //maximum allowed passengers in the elevator
 	public static final int ELEVATOR_MAX_TOPBOT = 4; //to prevent starving in middle floors, don't allow filling the elevator at min/max floors
 	
@@ -79,7 +79,7 @@ public class ElevatorScene {
 		 * elevator threads to stop
 		 */
 		
-		elevatorOpen = 0;
+		elevatorOpen = null;
 		eScene = this;
 
 		this.numberOfFloors = numberOfFloors;
@@ -168,21 +168,21 @@ public class ElevatorScene {
 	public void nextFloor(int elevator) {
 		if (elevatorGoingUp.get(elevator) && getNumberOfPeopleInElevator(elevator) == 0) {
 			//elevatorGoingUp.set(elevator, false);
-			System.out.println("I'm empty and going up, turning down.");
-			for(int i=getCurrentFloorForElevator(elevator); i < getNumberOfFloors(); i++) {
+			//System.out.println("I'm empty and going up");
+			for(int i = getCurrentFloorForElevator(elevator); i > 0; i--) {
 				if(isButtonPushedAtFloor(i)) {
-					System.out.println("I'm empty and going up, someone is above me. Going up.");
-					elevatorGoingUp.set(elevator, true);
+					System.out.println("I'm empty and someone is below me. Going down.");
+					elevatorGoingUp.set(elevator, false);
 				}
 			}
 		}
 		else if(!elevatorGoingUp.get(elevator) && getNumberOfPeopleInElevator(elevator) == 0) {
 			//elevatorGoingUp.set(elevator, true);
-			System.out.println("I'm empty and going down, turning it UP.");
-			for(int i = getCurrentFloorForElevator(elevator); i > 0; i--) {
+			//System.out.println("I'm empty and going down");
+			for(int i=getCurrentFloorForElevator(elevator); i < getNumberOfFloors(); i++) {
 				if(isButtonPushedAtFloor(i)) {
-					System.out.println("I'm empty and going down, someone is below me. Going down.");
-					elevatorGoingUp.set(elevator, false);
+					System.out.println("I'm empty and someone is above me. Going up.");
+					elevatorGoingUp.set(elevator, true);
 				}
 			}
 		}
