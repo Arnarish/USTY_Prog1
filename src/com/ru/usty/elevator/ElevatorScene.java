@@ -168,16 +168,13 @@ public class ElevatorScene {
 	public void nextFloor(int elevator) {
 		if (elevatorGoingUp.get(elevator) && getNumberOfPeopleInElevator(elevator) == 0) {
 			//elevatorGoingUp.set(elevator, false);
-			//System.out.println("I'm empty and going up");
-			for(int i = getCurrentFloorForElevator(elevator); i > 0; i--) {
+			for(int i=getCurrentFloorForElevator(elevator); i >= 0; i--) {
 				if(isButtonPushedAtFloor(i)) {
 					elevatorGoingUp.set(elevator, false);
 				}
-			}
+			}		
 		}
 		else if(!elevatorGoingUp.get(elevator) && getNumberOfPeopleInElevator(elevator) == 0) {
-			//elevatorGoingUp.set(elevator, true);
-			//System.out.println("I'm empty and going down");
 			for(int i=getCurrentFloorForElevator(elevator); i < getNumberOfFloors(); i++) {
 				if(isButtonPushedAtFloor(i)) {
 					elevatorGoingUp.set(elevator, true);
