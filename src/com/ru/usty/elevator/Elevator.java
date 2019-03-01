@@ -33,11 +33,12 @@ public class Elevator implements Runnable{
 				
 				//load passengers
 				this.passangers = ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID);
+				System.out.println(this.passangers);
 				if((capacity - passangers) > 0) {
 					if(ElevatorScene.eScene.elevatorGoingUp.get(elevatorID)) {
 						//only people in wait going up
 						int peopleWaiting = ElevatorScene.eScene.getNumberOfPeopleWaitingAtFloor(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID));
-						if((peopleWaiting + passangers) > capacity) {
+						if(peopleWaiting + passangers > capacity) {
 							ElevatorScene.goingUp.get(elevatorID).release((capacity-passangers));
 						}
 						else {

@@ -325,7 +325,6 @@ public class ElevatorScene {
 	//but before it finishes its run.
 	public void personExitsAtFloor(int floor, int elevator) {
 		try {
-			
 			exitedCountMutex.get(elevator).acquire();
 			exitedCount.set(floor, (exitedCount.get(floor) + 1));
 			exitedCountMutex.get(elevator).release();
