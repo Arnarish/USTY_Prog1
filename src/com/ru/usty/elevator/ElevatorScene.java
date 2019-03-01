@@ -17,7 +17,7 @@ public class ElevatorScene {
 	//feel free to change this.  It will be changed during grading
 	public static final int VISUALIZATION_WAIT_TIME = 400;  //milliseconds
 	public static final int ELEVATOR_MAX = 6; //maximum allowed passengers in the elevator
-	public static final int ELEVATOR_MAX_TOPBOT = 4; //to prevent starving in middle floors, don't allow filling the elevator at min/max floors
+	public static final int ELEVATOR_MAX_TOPBOT = 3; //to prevent starving in middle floors, don't allow filling the elevator at min/max floors
 	
 	public static ElevatorScene eScene; //allows the threads to communicate and modify required parameters
 	

@@ -13,7 +13,7 @@ public class ElevatorMainProgram {
 
 			Thread.sleep(1000);
 
-			TestSuite.runTest(5);
+			TestSuite.runTest(9);
 
 			Thread.sleep(2000);
 
