@@ -35,13 +35,17 @@ public class Elevator implements Runnable{
 				ElevatorScene.exitFloors.get(elevatorID).get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).release(ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID));
 				Thread.sleep(500);
 				ElevatorScene.exitFloors.get(elevatorID).get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).tryAcquire(ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID));
-
-				this.passangers = ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID);
-				System.out.println(this.passangers);
+				/*if((ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)+1) == ElevatorScene.eScene.getNumberOfFloors()) {
+					System.out.println("Top floor now");
+				}*/
+				this.passangers = ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID);				
+				
 				if((capacity - passangers) > 0) {
 					if(ElevatorScene.eScene.elevatorGoingUp.get(elevatorID)) {
+
 						//only people in wait going up
 						int peopleWaiting = ElevatorScene.eScene.getNumberOfPeopleWaitingAtFloor(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID));
+						System.out.println("People on waiting going up: " + peopleWaiting);
 						if(peopleWaiting + passangers > capacity) {
 							ElevatorScene.goingUp.get(elevatorID).release(capacity - passangers);
 						}
@@ -49,10 +53,14 @@ public class Elevator implements Runnable{
 							ElevatorScene.goingUp.get(elevatorID).release(peopleWaiting);
 						}
 					}
+					
 					else {
+						//people waiting to go down
 						int peopleWaiting = ElevatorScene.eScene.getNumberOfPeopleWaitingAtFloor(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID));
+						System.out.println("People on waiting going down: " + peopleWaiting);
 						if(peopleWaiting + passangers > capacity) {
-							ElevatorScene.goingDown.get(elevatorID).release(capacity-passangers);
+							ElevatorScene.goingDown.get(elevatorID).release(capacity - passangers);
+							System.out.println("This happened");
 						}
 						else {
 							ElevatorScene.goingDown.get(elevatorID).release(peopleWaiting);
