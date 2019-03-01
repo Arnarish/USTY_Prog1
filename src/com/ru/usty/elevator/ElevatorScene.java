@@ -24,15 +24,17 @@ public class ElevatorScene {
 	private int numberOfFloors;
 	private int numberOfElevators;
 	
+	public boolean stoprun = false;
+	
 	public static ArrayList<Semaphore> exitedCountMutex; //list in case of multiple elevators
 	public static ArrayList<Semaphore> goingUp;
 	public static ArrayList<Semaphore> goingDown;
 	public static ArrayList<Semaphore> inElevatorMutex;
 	public static ArrayList<ArrayList<Semaphore>> exitFloors;
 	public static Semaphore personCMutex; 
-	public static ArrayList<Semaphore> elevatorOpenMutex; //no more than one elevator open at once
+	public static ArrayList<Semaphore> elevatorOpenMutex; //no more than one elevator open at once per floor
 	
-	public static ArrayList<Integer> elevatorOpen; 
+	public static ArrayList<Integer> elevatorOpen; //what elevator is open at each floor?
 	public static ArrayList<Integer> currFloor; //list of where all the elevators are located
 	public static ArrayList<Integer> peopleInElevator; //list of people in elevators
 	public ArrayList<Boolean> elevatorGoingUp; //is the elevator going up or down
@@ -51,22 +53,24 @@ public class ElevatorScene {
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
 
-
-		/**
-		 * Important to add code here to make new
-		 * threads that run your elevator-runnables
-		 * 
-		 * Also add any other code that initializes
-		 * your system for a new run
-		 * 
-		 * If you can, tell any currently running
-		 * elevator threads to stop
-		 */
+		//stop any elevator threads running
+		stoprun = true;
+		if(elevatorThread != null) {
+			try {
+				elevatorThread.join();
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		
+		stoprun = false; //must be set to false again before starting elevators
 		eScene = this;
 
 		this.numberOfFloors = numberOfFloors;
 		this.numberOfElevators = numberOfElevators;
+		
 		//initialize all semaphores for a new run
 		personCMutex = new Semaphore(1);
 		elevatorOpenMutex = new ArrayList<Semaphore>();
@@ -75,6 +79,7 @@ public class ElevatorScene {
 		goingUp = new ArrayList<Semaphore>();
 		exitedCountMutex = new ArrayList<Semaphore>();
 		exitFloors = new ArrayList<ArrayList<Semaphore>>();
+		
 		//initialize lists for a new run
 		elevatorOpen = new ArrayList<Integer>();
 		personsUp = new ArrayList<Integer>();
@@ -83,12 +88,13 @@ public class ElevatorScene {
 		peopleInElevator = new ArrayList<Integer>();
 		elevatorGoingUp = new ArrayList<Boolean>();
 		currFloor = new ArrayList<Integer>();
+		
 		//below, we loop through the number of floors/elevators as appropriate and add each elevator/floor as relevant for a new run.
 		for(int i = 0; i < numberOfFloors; i++) {
 			this.personCount.add(0);
 			this.personsUp.add(0);
 			this.personsDown.add(0);
-			this.elevatorOpen.add(null);
+			elevatorOpen.add(null);
 		}
 		
 		for(int i = 0; i < numberOfElevators; i++) {
@@ -153,6 +159,7 @@ public class ElevatorScene {
 	
 	//Avoid starvation for floors between top and bottom
 	public boolean checkMiddle() {
+		//if any floor between top and bottom has any individual waiting, return true
 		for(int i = 1; i < numberOfFloors-1; i++) {
 			if(isButtonPushedAtFloor(i)) {
 				return true;

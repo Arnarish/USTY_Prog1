@@ -12,10 +12,13 @@ public class Elevator implements Runnable{
 		this.passangers = passangersTotal;
 	}
 	
-	
 	public void run() {
 		while(true) {
 			try{
+				if(ElevatorScene.eScene.stoprun) {
+					//break the loop and terminate the thread
+					return;
+				}
 				//first open the doors, not allowing other elevators to open.
 				ElevatorScene.elevatorOpenMutex.get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).acquire();
 				ElevatorScene.elevatorOpen.set(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID), elevatorID);
@@ -50,10 +53,10 @@ public class Elevator implements Runnable{
 		try {
 			this.passangers = ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID);
 			if(ElevatorScene.eScene.checkMiddle() && (ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID) == 0 || ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID) == ElevatorScene.eScene.getNumberOfFloors()-1)) {
-				this.capacity = ElevatorScene.eScene.ELEVATOR_MAX_TOPBOT;
+				this.capacity = ElevatorScene.ELEVATOR_MAX_TOPBOT;
 			}
 			else {
-				this.capacity = ElevatorScene.eScene.ELEVATOR_MAX;
+				this.capacity = ElevatorScene.ELEVATOR_MAX;
 			}
 				int peopleWaiting = ElevatorScene.eScene.getNumberOfPeopleWaitingAtFloor(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID));
 				if(ElevatorScene.eScene.elevatorGoingUp.get(elevatorID)) {

@@ -5,7 +5,7 @@ public class Person implements Runnable{
 	int elevator; //keep track of the elevator this person enters
 	boolean goingUp; //is the person going up or down floors
 	Person(int source, int dest){
-		this.source = source;
+		this.source = source; 
 		this.dest = dest; 
 		//boolean to track if person is going up or down with the elevator
 		if(dest >= source) {
@@ -27,7 +27,6 @@ public class Person implements Runnable{
 			}
 			//in case of multiple elevator options, keep track of what elevator this person is in
 			this.elevator = ElevatorScene.elevatorOpen.get(source);
-			//System.out.println("Person: Entering elevator: " + elevator + " on floor " + ElevatorScene.eScene.getCurrentFloorForElevator(elevator) + ". Destination floor: " + dest);
 			//person is in the elevator, remove from waiting and put in elevator
 			ElevatorScene.eScene.decPeopleWaiting(source, goingUp);
 			ElevatorScene.eScene.incPeopleInElevator(elevator);
