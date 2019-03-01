@@ -171,7 +171,6 @@ public class ElevatorScene {
 			//System.out.println("I'm empty and going up");
 			for(int i = getCurrentFloorForElevator(elevator); i > 0; i--) {
 				if(isButtonPushedAtFloor(i)) {
-					System.out.println("I'm empty and someone is below me. Going down.");
 					elevatorGoingUp.set(elevator, false);
 				}
 			}
@@ -181,7 +180,6 @@ public class ElevatorScene {
 			//System.out.println("I'm empty and going down");
 			for(int i=getCurrentFloorForElevator(elevator); i < getNumberOfFloors(); i++) {
 				if(isButtonPushedAtFloor(i)) {
-					System.out.println("I'm empty and someone is above me. Going up.");
 					elevatorGoingUp.set(elevator, true);
 				}
 			}

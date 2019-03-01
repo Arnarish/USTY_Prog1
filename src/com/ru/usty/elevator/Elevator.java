@@ -23,12 +23,12 @@ public class Elevator implements Runnable{
 				//release semaphores so passengers can exit the elevator
 				ElevatorScene.inElevatorMutex.get(elevatorID).release(ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID));
 				//gives other threads time to work
-				Thread.sleep(1000);
+				Thread.sleep(500);
 				//block so people can't exit the elevator if current floor is not the destination
 				ElevatorScene.inElevatorMutex.get(elevatorID).tryAcquire(ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID));
 				
 				ElevatorScene.exitFloors.get(elevatorID).get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).release(ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID));
-				Thread.sleep(1000);
+				Thread.sleep(500);
 				ElevatorScene.exitFloors.get(elevatorID).get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).tryAcquire(ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID));
 				
 				//load passengers
