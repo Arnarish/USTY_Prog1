@@ -16,6 +16,10 @@ public class Elevator implements Runnable{
 	public void run() {
 		while(true) {
 			try{
+				if(ElevatorScene.eScene.stoprun) {
+					//break the loop and terminate the thread
+					return;
+				}
 				//first open the doors, not allowing other elevators to open.
 				ElevatorScene.elevatorOpenMutex.acquire();
 				ElevatorScene.elevatorOpen = elevatorID;

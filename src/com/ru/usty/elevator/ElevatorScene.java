@@ -24,6 +24,8 @@ public class ElevatorScene {
 	private int numberOfFloors;
 	private int numberOfElevators;
 	
+	public boolean stoprun = false;
+	
 	public static ArrayList<Semaphore> exitedCountMutex; //list in case of multiple elevators
 	public static ArrayList<Semaphore> goingUp;
 	public static ArrayList<Semaphore> goingDown;
@@ -52,22 +54,16 @@ public class ElevatorScene {
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
 
 		//missing method to stop a run if there are threads running currently?
-		
-		/*new Thread(new Runnable() { commented out by SDG, merge conflict
-			public void run() {
-				for(int i = 0; i < 20; i++) {
-					sem.release();
-					System.out.println("Permits " + sem.availablePermits());
-				}	
+		stoprun = true;
+		if(elevatorThread != null) {
+			try {
+				elevatorThread.join();
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		}).start();
-		
-		//Elevator elevator = new Elevator(0, 0, numberOfFloors, 0, null, sem);
-		//Elevator elevator = new Elevator(0, numberOfFloors, 0, null, sem);
-		
-		
-		//sem.release();*/
-
+		}
 		/**
 		 * Important to add code here to make new
 		 * threads that run your elevator-runnables
@@ -78,7 +74,7 @@ public class ElevatorScene {
 		 * If you can, tell any currently running
 		 * elevator threads to stop
 		 */
-		
+		stoprun = false;
 		elevatorOpen = null;
 		eScene = this;
 
