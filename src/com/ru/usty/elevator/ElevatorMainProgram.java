@@ -10,10 +10,10 @@ public class ElevatorMainProgram {
 			TestSuite.startVisualization();
 
 /***EXPERIMENT HERE BUT THIS WILL BE CHANGED DURING GRADING***/
-
+			
 			Thread.sleep(1000);
 
-			TestSuite.runTest(7);
+			TestSuite.runTest(6);
 
 			Thread.sleep(2000);
 			/*
@@ -21,7 +21,7 @@ public class ElevatorMainProgram {
 			TestSuite.runTest(i);
 			Thread.sleep(2000);
 			}
-	*/
+		*/
 /*************************************************************/
 
 		} catch (InterruptedException e) {

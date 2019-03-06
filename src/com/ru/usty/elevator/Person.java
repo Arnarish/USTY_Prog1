@@ -18,7 +18,7 @@ public class Person implements Runnable{
 	
 	public void run() {
 		try {
-			//person going up or down?
+			//Acquire the correct semaphore based on where person intends to travel
 			if (goingUp) {
 				ElevatorScene.goingUp.get(source).acquire();
 			}

@@ -58,7 +58,7 @@ public class ElevatorScene {
 		if(elevatorThread != null) {
 			try {
 				elevatorThread.join();
-				Thread.sleep(200);
+				Thread.sleep(400);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -112,7 +112,7 @@ public class ElevatorScene {
 			exitedCount.clear();
 		}
 		for(int i = 0; i < getNumberOfFloors(); i++) {
-			elevatorOpenMutex.add(new Semaphore(1));
+			elevatorOpenMutex.add(new Semaphore(1)); //binary semaphore, only one elevator can be open on each floor
 			this.exitedCount.add(0);
 			goingUp.add(new Semaphore(0));
 			goingDown.add(new Semaphore(0));
@@ -177,7 +177,7 @@ public class ElevatorScene {
 		}
 		return false;
 	}
-	
+	//decide what floor the elevator goes next, up or down, within boundaries
 	public void nextFloor(int elevator) {
 		if (elevatorGoingUp.get(elevator) && getNumberOfPeopleInElevator(elevator) == 0) {
 			for(int i=getCurrentFloorForElevator(elevator); i >= 0; i--) {
@@ -202,7 +202,7 @@ public class ElevatorScene {
 			elevatorGoingUp.set(elevator, true);
 		}
 	}
-	
+	//move the elevator up or down, update relevant lists
 	public void floorTransition(int elevator) {
 		if(elevatorGoingUp.get(elevator)) {
 			currFloor.set(elevator, (currFloor.get(elevator) +1));
@@ -217,8 +217,7 @@ public class ElevatorScene {
 			}
 		}
 	}
-	
-	
+	//People in elevator ++
 	public void incPeopleInElevator(int elevator) {
 		try {
 			personCMutex.acquire();
@@ -229,7 +228,7 @@ public class ElevatorScene {
 			e.printStackTrace();
 		}
 	}
-	
+	//People in elevator --
 	public void decPeopleInElevator(int elevator) {
 		try {
 			personCMutex.acquire();
@@ -240,7 +239,7 @@ public class ElevatorScene {
 			e.printStackTrace();
 		}
 	}
-	
+	//People waiting on floor, sorted by travel direction ++
 	public void incPeopleWaiting(int floor, boolean goingUp) {
 		try {
 			personCMutex.acquire();
@@ -257,7 +256,7 @@ public class ElevatorScene {
 			e.printStackTrace();
 		}
 	}
-	
+	//People waiting on floor, sorted by travel direction --
 	public void decPeopleWaiting(int floor, boolean goingUp) {
 		try {
 			personCMutex.acquire();
