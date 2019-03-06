@@ -25,15 +25,15 @@ public class Elevator implements Runnable{
 				System.out.println("Elevator: " + elevatorID);
 				if(ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID) >= 0) {
 					releasePassengers();
-					Thread.sleep(100);
+					Thread.sleep(200);
 					loadPassengers();
-					Thread.sleep(100);
+					Thread.sleep(200);
 					releasePassengers();
 				}
 				else {
 					// lift is empty, we can start by loading it.
 					loadPassengers();
-					Thread.sleep(100);
+					Thread.sleep(200);
 					releasePassengers();
 				}
 				// close the door, and move on to the next floor
@@ -103,6 +103,7 @@ public class Elevator implements Runnable{
 			ElevatorScene.exitFloors.get(elevatorID).get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).release(ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID));
 			Thread.sleep(200);
 			ElevatorScene.exitFloors.get(elevatorID).get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).tryAcquire(ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID));
+			this.passangers = ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID);
 			//System.out.println("Floor: " + ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID) + " departing: " + ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID));
 		} catch (Exception e) {
 			// TODO: handle exception

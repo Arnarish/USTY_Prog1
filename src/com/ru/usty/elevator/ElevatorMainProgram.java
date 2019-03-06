@@ -13,15 +13,15 @@ public class ElevatorMainProgram {
 
 			Thread.sleep(1000);
 
-			TestSuite.runTest(8);
+			TestSuite.runTest(7);
 
 			Thread.sleep(2000);
-
-		//	for(int i = 0; i <= 9; i++) {
-		//		TestSuite.runTest(i);
-		//		Thread.sleep(2000);
-		//	}
-
+			/*
+			for(int i = 0; i <= 9; i++) {
+			TestSuite.runTest(i);
+			Thread.sleep(2000);
+			}
+	*/
 /*************************************************************/
 
 		} catch (InterruptedException e) {
