@@ -27,11 +27,11 @@ public class ElevatorScene {
 	public boolean stoprun = false;
 	
 	public static ArrayList<Semaphore> exitedCountMutex; //list in case of multiple elevators
-	public static ArrayList<Semaphore> goingUp;
-	public static ArrayList<Semaphore> goingDown;
-	public static ArrayList<Semaphore> inElevatorMutex;
-	public static ArrayList<ArrayList<Semaphore>> exitFloors;
-	public static Semaphore personCMutex; 
+	public static ArrayList<Semaphore> goingUp; //wait list going up
+	public static ArrayList<Semaphore> goingDown; //wait list going down
+	public static ArrayList<Semaphore> inElevatorMutex; //person in elevator can't leave
+	public static ArrayList<ArrayList<Semaphore>> exitFloors; //person must leave at correct floor
+	public static Semaphore personCMutex; //only edit one person at a time
 	public static ArrayList<Semaphore> elevatorOpenMutex; //no more than one elevator open at once per floor
 	
 	public static ArrayList<Integer> elevatorOpen; //what elevator is open at each floor?
@@ -121,7 +121,7 @@ public class ElevatorScene {
 		for(int i = 0; i < numberOfElevators; i++) {
 			int startfloor = 0; // could be random if we want to initialize on a random floor
 			peopleInElevator.add(0);
-			elevatorThread = new Thread(new Elevator(i, startfloor, ELEVATOR_MAX, peopleInElevator.get(i))); //nobody starts inside the elevator
+			elevatorThread = new Thread(new Elevator(i, ELEVATOR_MAX, peopleInElevator.get(i))); //nobody starts inside the elevator
 			elevatorGoingUp.add(true); //we're starting on the ground floor, only way is up
 			currFloor.add(startfloor);
 			exitedCountMutex.add(new Semaphore(1));
@@ -161,6 +161,16 @@ public class ElevatorScene {
 	public boolean checkMiddle() {
 		//if any floor between top and bottom has any individual waiting, return true
 		for(int i = 1; i < numberOfFloors-1; i++) {
+			if(isButtonPushedAtFloor(i)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean checkAny() {
+		//if any floor between top and bottom has any individual waiting, return true
+		for(int i = 0; i < numberOfFloors; i++) {
 			if(isButtonPushedAtFloor(i)) {
 				return true;
 			}

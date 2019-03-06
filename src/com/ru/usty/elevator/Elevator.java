@@ -5,9 +5,8 @@ package com.ru.usty.elevator;
 public class Elevator implements Runnable{
 	int elevatorID, currFloor, capacity, passangers;
 	
-	public Elevator(int elevatorID, int currFloor, int capacity, int passangersTotal) {
+	public Elevator(int elevatorID, int capacity, int passangersTotal) {
 		this.elevatorID = elevatorID;
-		this.currFloor = currFloor;
 		this.capacity = ElevatorScene.ELEVATOR_MAX;
 		this.passangers = passangersTotal;
 	}
@@ -22,7 +21,8 @@ public class Elevator implements Runnable{
 				//first open the doors, not allowing other elevators to open.
 				ElevatorScene.elevatorOpenMutex.get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).acquire();
 				ElevatorScene.elevatorOpen.set(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID), elevatorID);
-				//update whether the elevator is going up or down
+				//release/accept passengers
+				System.out.println("Elevator: " + elevatorID);
 				if(ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID) >= 0) {
 					releasePassengers();
 					Thread.sleep(100);
@@ -31,16 +31,21 @@ public class Elevator implements Runnable{
 					releasePassengers();
 				}
 				else {
+					// lift is empty, we can start by loading it.
 					loadPassengers();
 					Thread.sleep(100);
 					releasePassengers();
 				}
-			
 				// close the door, and move on to the next floor
 				ElevatorScene.elevatorOpenMutex.get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).release();
-				Thread.sleep(500);
-				ElevatorScene.eScene.nextFloor(elevatorID);
-				ElevatorScene.eScene.floorTransition(elevatorID);
+				if(this.passangers > 0 || ElevatorScene.eScene.checkAny()) {
+					ElevatorScene.eScene.nextFloor(elevatorID);
+					ElevatorScene.eScene.floorTransition(elevatorID);
+					Thread.sleep(400);
+				}
+				else {
+					Thread.sleep(400);
+				}
 				
 			}
 			catch(Exception e) {
@@ -61,16 +66,17 @@ public class Elevator implements Runnable{
 				int peopleWaiting = ElevatorScene.eScene.getNumberOfPeopleWaitingAtFloor(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID));
 				if(ElevatorScene.eScene.elevatorGoingUp.get(elevatorID)) {
 					//only people in wait going up
-					//System.out.println("Load up");
-					if(peopleWaiting + passangers > capacity) {
-						ElevatorScene.goingUp.get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).release((capacity-passangers));
+					if((peopleWaiting + this.passangers) > this.capacity) {
+						System.out.println("Space in elevator: " + (this.capacity-this.passangers));
+						ElevatorScene.goingUp.get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).release(this.capacity-this.passangers);
 					}
 					else {
+						System.out.println("Space in elevator: " + (this.capacity-this.passangers));
 						ElevatorScene.goingUp.get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).release(peopleWaiting);
 					}
 				}
 				else {
-					//System.out.println("Load Down");
+					//only people going down
 					if((peopleWaiting + passangers) > capacity) {
 						ElevatorScene.goingDown.get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).release(capacity-passangers);
 					}
@@ -78,7 +84,7 @@ public class Elevator implements Runnable{
 						ElevatorScene.goingDown.get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).release(peopleWaiting);
 					}
 				}
-				Thread.sleep(200);
+				this.passangers = ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID);
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -87,15 +93,17 @@ public class Elevator implements Runnable{
 	
 	private void releasePassengers() {
 		try {
+			//System.out.println("Floor: " + ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID) + " arriving: " + ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID));
 			ElevatorScene.inElevatorMutex.get(elevatorID).release(ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID));
 			//gives other threads time to work
-			Thread.sleep(400);
+			Thread.sleep(200);
 			//block so people can't exit the elevator if current floor is not the destination
 			ElevatorScene.inElevatorMutex.get(elevatorID).tryAcquire(ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID));
 			
 			ElevatorScene.exitFloors.get(elevatorID).get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).release(ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID));
-			Thread.sleep(400);
+			Thread.sleep(200);
 			ElevatorScene.exitFloors.get(elevatorID).get(ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID)).tryAcquire(ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID));
+			//System.out.println("Floor: " + ElevatorScene.eScene.getCurrentFloorForElevator(elevatorID) + " departing: " + ElevatorScene.eScene.getNumberOfPeopleInElevator(elevatorID));
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
